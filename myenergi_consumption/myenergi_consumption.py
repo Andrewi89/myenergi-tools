@@ -21,12 +21,6 @@ def get_consumption_data(eddi_serial, api_key, selected_date):
 def joules_to_wh(joules):
     return joules / 3600
 
-# Function to convert temperature from Fahrenheit to Celsius
-
-
-def fahrenheit_to_celsius(fahrenheit_temp):
-    return (fahrenheit_temp - 32) * 5 / 9
-
 # Streamlit app
 
 
