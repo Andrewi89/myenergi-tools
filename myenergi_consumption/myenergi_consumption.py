@@ -14,14 +14,12 @@ DEVICES = ['zappi', 'eddi', 'harvi', 'libbi']
 
 # Function to get device data
 
-
 def get_device_data(device_serial, api_key):
     url = f"{BASE_URL}/cgi-jstatus-*"
     response = requests.get(url, auth=HTTPDigestAuth(device_serial, api_key))
     return response.json() if response.status_code == 200 else None
 
 # Function to get consumption data
-
 
 def get_consumption_data(device, device_serial, gateway_serial, api_key, start_date, end_date):
     data = []
@@ -37,7 +35,6 @@ def get_consumption_data(device, device_serial, gateway_serial, api_key, start_d
 
 # Function to find device
 
-
 def find_device(device_data, user_serial):
     user_serial = int(user_serial)
     all_devices = {device_name: data_dict[device_name][0].get('sno') for data_dict in device_data if isinstance(
@@ -47,7 +44,6 @@ def find_device(device_data, user_serial):
     return matched_device, all_devices
 
 # Main function
-
 
 def main():
     st.title("Myenergi Data")
@@ -107,8 +103,25 @@ def main():
             df = pd.DataFrame(consumption_data)
             df['v1'] = df['v1'] / 10
             df['frq'] = df['frq'] / 100
-            df['pt1'] = df['pt1'] / 10
-            df['pt2'] = df['pt2'] / 10
+            if 'pt1' in df.columns:
+                df['pt1'] = df['pt1'] / 10
+                df['pt2'] = df['pt2'] / 10
+            else:
+                df['pt1'] = 0
+                df['pt2'] = 0
+            # df['pt1'] = df['pt1'] / 10
+            # df['pt2'] = df['pt2'] / 10
+                
+            
+            # battery information
+            if 'batt' in df.columns:
+                df['bcp1'] = df['bcp1'] / 60000
+                df['bdp1'] = df['bdp1'] / 60000
+                df['soc1'] = df['soc1']
+            else:
+                df['bcp1'] = 0
+                df['bdp1'] = 0
+                df['soc1'] = 0
 
             # Columns for metrics in kWh (these values are the energy consumed in each minute)
             df['imp_kWh_metric'] = df['imp'] / (60 * 1000)
@@ -142,32 +155,43 @@ def main():
             df['gep_kWh_metric'] = df['gep_total_joules'] / 3600000
             df['gen_kWh_metric'] = df['gen_total_joules'] / 3600000
 
-            # df['imp'] = df['imp'] / 60000  # Convert to kW
-            # df['exp'] = df['exp'] / 60000  # Convert to kW
-            # df['gep'] = df['gep'] / 60000  # Convert to kW
-            # df['gen'] = df['gen'] / 60000  # Convert to kW
-
             df['hr'].fillna(0, inplace=True)
             df['min'].fillna(0, inplace=True)
             df['time'] = pd.to_datetime(df['yr'].astype(str) + '-' + df['mon'].astype(str) + '-' + df['dom'].astype(str) + ' ' +
                                         df['hr'].astype(int).astype(str).str.zfill(2) + ':' +
                                         df['min'].astype(int).astype(str).str.zfill(2), format='%Y-%m-%d %H:%M')
+
+            #data visualisation starts here 
+
             st.subheader("Summary:")
             col1, col2 = st.columns(2)
 
             st.subheader("Breakdown:")
-            st.line_chart(df.set_index('time')[['v1', 'frq']].rename(
-                columns={'v1': 'Voltage', 'frq': 'Frequency Hz'}))
-
-            st.subheader("Tank Temperatures:")
-            st.line_chart(df.set_index('time')[['pt1', 'pt2']].rename(
-                columns={'pt1': 'Tank 1 Temperature C', 'pt2': 'Tank 2 Temperature C'}))
 
             st.subheader("Energy Graph:")
             st.line_chart(df.set_index('time')[['imp_kW', 'exp_kW', 'gep_kW', 'gen_kW']].rename(columns={
                 'imp_kW': 'Imported Energy kW', 'exp_kW': 'Exported Energy kW',
                 'gep_kW': 'Positive generation energy kW', 'gen_kW': 'Negative generation energy kW'}))
 
+            st.subheader("Voltage and Frequency:")
+            st.line_chart(df.set_index('time')[['v1', 'frq']].rename(
+                columns={'v1': 'Voltage', 'frq': 'Frequency Hz'}))
+
+            if 'batt' in df.columns:
+                st.subheader("Battery Soc:")
+                st.line_chart(df.set_index('time')[['soc1']].rename(
+                    columns={'soc1': 'Battery SoC %'}))
+
+                st.subheader("Battery power:")
+                st.line_chart(df.set_index('time')[['bcp1','bdp1']].rename(
+                    columns={'bcp1': 'Battery charge power','bdp1': 'Battery discharge power'}))
+            
+            if 'pt1' in df.columns:
+                st.subheader("Tank Temperatures:")
+                st.line_chart(df.set_index('time')[['pt1', 'pt2']].rename(
+                    columns={'pt1': 'Tank 1 Temperature C', 'pt2': 'Tank 2 Temperature C'}))
+
+            
             # CSV Export
             csv = df.to_csv(index=False)
             # Convert CSV to base64
