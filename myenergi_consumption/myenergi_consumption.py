@@ -14,12 +14,14 @@ DEVICES = ['zappi', 'eddi', 'harvi', 'libbi']
 
 # Function to get device data
 
+
 def get_device_data(device_serial, api_key):
     url = f"{BASE_URL}/cgi-jstatus-*"
     response = requests.get(url, auth=HTTPDigestAuth(device_serial, api_key))
     return response.json() if response.status_code == 200 else None
 
 # Function to get consumption data
+
 
 def get_consumption_data(device, device_serial, gateway_serial, api_key, start_date, end_date):
     data = []
@@ -35,6 +37,7 @@ def get_consumption_data(device, device_serial, gateway_serial, api_key, start_d
 
 # Function to find device
 
+
 def find_device(device_data, user_serial):
     user_serial = int(user_serial)
     all_devices = {device_name: data_dict[device_name][0].get('sno') for data_dict in device_data if isinstance(
@@ -45,16 +48,22 @@ def find_device(device_data, user_serial):
 
 # Main function
 
+
 def main():
     st.title("Myenergi Data")
     st.info('In order to get your consumption you will need to enter the Gateway Device Serial & API Key to find devices.', icon="ℹ️")
     with st.expander("How on earth do i find my Gateway Device Serial & API Key? Click here for explanation"):
         st.write("""
-        First you will need to navigate to https://myaccount.myenergi.com/location#products
-        if you haven't already you will need to sign up to myenergi myaccount
-        in the code.
+        1. First you will need to navigate to https://myaccount.myenergi.com/location#products if you haven't already you will need to sign up to myenergi myaccount
+        2. Once logged in use the menu and navigate to "locations" and then "myenergi products"
+        3. Once on the "myenergi Product" page you will be presented with your "Gateway product" take a note of the serial number "sn"
+        4. press "Advance"
+        5. Press "Generate new API Key" - take a note 
+        6. pop them both in below and you are off!
         """)
-        st.image("https://static.streamlit.io/examples/dice.jpg")
+        st.caption(
+            "NOTE: We do not store your API Key or Serial Number so you need to keep them somewhere safe :)")
+        # st.image(" ")
 
     device_serial = st.text_input("Gateway Device Serial:")
     api_key = st.text_input("Gateway API Key:")
@@ -62,9 +71,6 @@ def main():
     st.session_state.setdefault('devices', [])
     st.session_state.setdefault('device_to_serial_map', {})
     st.session_state.setdefault('device_messages', [])
-
-   
-
 
     if st.button("Find Devices") and device_serial and api_key:
         with st.spinner('Fetching device data...'):
@@ -81,14 +87,12 @@ def main():
 
         st.write(
             f"Matching device for provided serial {device_serial} is {matched_device}" if matched_device else "No matching devices found for the provided serial.")
-            
+
     elif not device_serial or not api_key:
         st.warning("Please enter both Device Serial and API Key.")
 
     for message in st.session_state.device_messages:
         st.write(message)
-
-    
 
     if st.session_state.devices:
         st.divider()
@@ -102,7 +106,6 @@ def main():
         st.write("Select the date range to fetch the total minute data consumption.")
         start_date = st.date_input("Start Date", datetime.now())
         end_date = st.date_input("End Date", datetime.now())
-
 
         if st.button("Fetch Consumption Data") and selected_device and device_serial and api_key:
             selected_device_serial = st.session_state.device_to_serial_map.get(
@@ -122,8 +125,7 @@ def main():
                     df['pt2'] = 0
                 # df['pt1'] = df['pt1'] / 10
                 # df['pt2'] = df['pt2'] / 10
-                    
-                
+
                 # battery information
                 if 'batt' in df.columns:
                     df['bcp1'] = df['bcp1'] / 60000
@@ -172,7 +174,7 @@ def main():
                                             df['hr'].astype(int).astype(str).str.zfill(2) + ':' +
                                             df['min'].astype(int).astype(str).str.zfill(2), format='%Y-%m-%d %H:%M')
 
-                #data visualisation starts here 
+                # data visualisation starts here
 
                 st.divider()
 
@@ -196,15 +198,14 @@ def main():
                         columns={'soc1': 'Battery SoC %'}))
 
                     st.subheader("Battery power:")
-                    st.line_chart(df.set_index('time')[['bcp1','bdp1']].rename(
-                        columns={'bcp1': 'Battery charge power','bdp1': 'Battery discharge power'}))
-                
+                    st.line_chart(df.set_index('time')[['bcp1', 'bdp1']].rename(
+                        columns={'bcp1': 'Battery charge power', 'bdp1': 'Battery discharge power'}))
+
                 if 'pt1' in df.columns:
                     st.subheader("Tank Temperatures:")
                     st.line_chart(df.set_index('time')[['pt1', 'pt2']].rename(
                         columns={'pt1': 'Tank 1 Temperature C', 'pt2': 'Tank 2 Temperature C'}))
 
-                
                 # CSV Export
                 csv = df.to_csv(index=False)
                 # Convert CSV to base64
@@ -223,7 +224,8 @@ def main():
                 col1.metric("Total Consumed Energy", "{:.2f} kWh".format(
                     df['gen_kWh_metric'].iloc[0]))
 
-                col2.metric("Average Voltage", "{:.2f} V".format(df['v1'].mean()))
+                col2.metric("Average Voltage",
+                            "{:.2f} V".format(df['v1'].mean()))
                 col2.metric("Average Frequency",
                             "{:.2f} Hz".format(df['frq'].mean()))
                 col2.metric("Average Tank Temperature Sensor 1",
