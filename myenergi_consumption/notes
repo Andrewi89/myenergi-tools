@@ -1,0 +1,131 @@
+using the below API information from the documentation can you please correct the below code - can you update the line graphs so the X axis is the time and date. 
+
+cgi-jday-EID-year-month-day-sh-sm-mc
+Action
+Lists a day’s worth of historic data for an EDDI device in JSON minute by minute.
+
+Inputs
+EID
+EID is the character ‘E' followed by a Eddi serial number or ‘L' followed by a Libbi serial number or 'Z’ followed by a Zappi serial number.
+
+Year
+The year of historic data requested (four digits).
+
+Month
+The month of historic data requested. (1-12).
+
+Day
+The day of historic data requested. (1-28/29/30/31).
+
+sh (Optional)
+Starting Hour. Default value is 00 (Midnight UTC)
+
+sm (Optional)
+Starting Minute. Default value is 00.
+
+mc (Optional)
+Minute Count (No of minutes to be displayed). Default value is 1440 (one day). Maximum value is 1440.
+
+Cache Rules
+If minute count (mc) is less than or equal to 1440 the cache age is 300 seconds (five minutes). If minute count (mc) is greater than 1440 the cache age is 1800 seconds (half an hour).
+
+Output
+See cgi-jhour- for the output fields as they are identical.
+
+Example
+
+
+GET /cgi-jday-E1-2018-9-4 HTTP/1.1
+Host: 192.168.0.168
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:52.9) Gecko/20100101 Goanna/4.1 Firefox/52.9 PaleMoon/28.0.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,/;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Authorization: Digest username="2", realm="MyEnergi Telemetry", nonce="0000179000000001000000013786a4bd000197f29e3bdefe12253deda788c7fabd9884906841118bb870ae9825ff741a", uri="/cgi-jday-E1-2018-9-4", algorithm=MD5, response="a41e6d0aa16408537ecde3cf1a95fa71", opaque="000000100000000100000000f72ea423000525fe84b38a830988b5a74c8b2f2481d61c2ffd0d3f802e91f275d4219fe7", qop=auth, nc=00000006, cnonce="6d4c5c3e35e7a52a"
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+If-Modified-Since: Tue,04 Sep 2018 19:53:58 GMT
+Cache-Control: max-age=0
+
+HTTP/1.1 200 OK
+Server: WSWIDB version 1.600
+Content-Length: 21382
+Content-Type: application/json
+Last-Modified: Tue,04 Sep 2018 19:54:33 GMT
+Date: Tue,04 Sep 2018 19:54:33 GMT
+Cache-Control: private, max-age=0, s-maxage=0, no-cache
+Expires: Tue,04 Sep 2018 19:54:33 GMT
+Connection: Keep-Alive
+
+{"U1":[{"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24600,"h1d":60360,"v1":2327,"frq":5012},
+{"min":1,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24660,"h1d":60720,"v1":2331,"frq":5009},
+{"min":2,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24600,"h1d":60000,"v1":2324,"frq":5007},
+{"min":3,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24660,"v1":2332,"frq":5004},
+{"min":4,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24600,"h1d":59940,"v1":2325,"frq":5003},
+{"min":5,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24540,"v1":2324,"frq":5002},
+{"min":6,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24480,"h1d":59760,"v1":2318,"frq":4999},
+{"min":7,"hr":13,"dow":"Tue","dom":4,"mon":9,"yr":2018,"exp":24480,"h1d":59760,"v1":2318,"frq":5002}]}
+
+cgi-jhour-EID-year-month-day-hour
+Action
+Lists an hour’s worth of historic data for an Eddi, Zappi, Libbi device in JSON.
+
+Inputs
+EID
+EID is the character ‘E' followed by a Eddi serial number or ‘L' followed by a Libbi serial number or 'Z’ followed by a Zappi serial number.
+
+Year
+The year of historic data requested (four digits).
+
+Month
+The month of historic data requested. (1-12).
+
+Day
+The day of historic data requested. (1-28/29/30/31).
+
+Hour
+The hour of historic data requested. (0-23).
+
+Output
+A Json report listing the historic data for the device specified. Json tag names are kept to three characters to save bandwidth. 
+
+Field	Function	Units	Eddi	Libbi	Zappi
+yr	Year	Year (4 digits)	X	X	X
+mon	Month of Year	Month No	X	X	X
+dom	Day of month	Day No	X	X	X
+dow	Day of week	Three letter code e.g. “Mon”	X	X	X
+hr	Hour	Hours	X	X	X
+min	Minute	Minutes	X	X	X
+imp	Imported Energy	Joules or Watt Seconds	X	X	X
+exp	Exported Energy	Joules or Watt Seconds	X	X	X
+gep	Postive generation energy	Joules or Watt Seconds	X	X	X
+gen	Negative generation energy	Joules or Watt Seconds	X	X	X
+h1d	Diverted load power 1	Joules or Watt Seconds	X		X
+h1b	Boost load power 2	Joules or Watt Seconds	X		X
+h2d	Diverted load power 2	Joules or Watt Seconds	X		X
+h2b	Boost load power 2	Joules or Watt Seconds	X		X
+h3d	Diverted load power 3	Joules or Watt Seconds			X
+h3b	Boost load power 3	Joules or Watt Seconds			X
+pect1	External CT1 Positive Energy	Joules or Watt Seconds	X	X	X
+nect1	External CT1 Negative Energy	Joules or Watt Seconds	X	X	X
+pect2	External CT2 Positive Energy	Joules or Watt Seconds	X	X	X
+nect2	External CT2 Negative Energy	Joules or Watt Seconds	X	X	X
+pect3	External CT2 Positive Energy	Joules or Watt Seconds		X	X
+nect3	External CT2 Negative Energy	Joules or Watt Seconds		X	X
+v1	Voltage Phase 1	0.1 Volts	X	X	X
+frq	Frequency of mains	0.01 Hz	X	X	X
+hsk	Heatsink Temperature	Tenths of a degree Celsius	X		
+pt1	Temperature of PT1 sensor	Degrees Celsius	X		
+pt2	Temperature of PT2 sensor	Degrees Celsius	X		
+ive1	Inverter export power 1	Joules or Watt Seconds		X	
+ivi1	Inverter import power 1	Joules or Watt Seconds		X	
+ivt	Inverter temperature	Degrees Celsius		X	
+batt	Battery temperature	Degrees Celsius		X	
+batrt	Battery radiator temperature	Degrees Celsius		X	
+ambt	Ambient temperature	Degrees Celsius		X	
+contt	Controller temperature	Degrees Celsius		X	
+bcp1	Battery charge power 1	Joules or Watt Seconds		X	
+bdp1	Battery discharge power 1	Joules or Watt Seconds		X	
+pvp1	PV Power 1	Joules or Watt Seconds		X	
+soc1	State of charge 1	Percentage		X	
+
