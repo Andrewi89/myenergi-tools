@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def calculate_temperature_increase(energy_kwh, water_volume_liters):
     # Convert energy to Joules
     energy_joules = energy_kwh * 3.6e6
@@ -32,5 +33,3 @@ st.metric(label='Temperature Increase (°C)',
 # Check if temperature increase is above 100°C and display warning with animated GIF
 if temperature_increase > 100:
     st.warning('The water is boiling!')
-    st.markdown(
-        '![Boiling Water](https://gifdb.com/images/high/boiling-water-bubbles-cartoon-65zw0jns86htivzc.gif)', unsafe_allow_html=True)
