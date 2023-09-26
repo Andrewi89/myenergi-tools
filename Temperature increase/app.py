@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 def calculate_temperature_increase(energy_kwh, water_volume_liters):
     # Convert energy to Joules
     energy_joules = energy_kwh * 3.6e6
