@@ -14,7 +14,7 @@ def calculate_temperature_increase(energy_kwh, water_volume_liters):
 
 
 # Streamlit UI
-st.title('eddi |Temperature Increase Calculator')
+st.title('eddi | Temperature Increase Calculator')
 
 # User input
 water_volume_liters = st.slider(
